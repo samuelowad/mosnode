@@ -9,9 +9,9 @@ var obj = { project: [] };
 
 const Clubhouse = require("clubhouse-lib");
 const { default: chalk } = require("chalk");
-const client = Clubhouse.create("Your API KEY");
+const client = Clubhouse.create("YOUR API TOKEN");
 
-const options = usage("Usage: -n <name> -o <nameOfFile> -p <12,23>")
+const options = usage("Usage:-o <nameOfFile> -p <12,23>")
   .option("o", {
     alias: "nOF",
     describe: "name of output file",
@@ -30,14 +30,28 @@ async function test() {
   //   console.log(options.list);
   for (let i = 0; i < options.list.length; i++) {
     // console.log(options.list[i]);
-    await client.getProject(options.list[i]).then((res) => {
-      //   console.log(res);
-      obj.project.push({
-        id: res.id,
-        name: res.name,
-        description: res.description,
+    await client
+      .getProject(options.list[i])
+      .then((res) => {
+        // console.log(res);
+        if (res.statusCode != 200) {
+          //   console.log("hh");
+          //   return;
+          const error = new Error(
+            `project with id ${options.list[i]} can not be found `
+          );
+          throw error;
+        } else {
+          obj.project.push({
+            id: res.id,
+            name: res.name,
+            description: res.description,
+          });
+        }
+      })
+      .catch((err) => {
+        console.log(err);
       });
-    });
   }
 
   var json = JSON.stringify(obj);
